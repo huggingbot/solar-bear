@@ -2,6 +2,7 @@
   "name": "hardhat-project",
   "scripts": {
     "lint:solidity": "solhint 'contracts/**/*.sol'",
+    "lint:solidity:fix": "solhint 'contracts/**/*.sol' --fix",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
     "lint:fix": "eslint --fix --ignore-path .gitignore --ext .js,.ts ."
   },
