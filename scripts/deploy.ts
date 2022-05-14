@@ -6,14 +6,10 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  const [deployer] = await ethers.getSigners();
+  console.log('Deploying contracts with the account:', deployer.address);
+  console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  // We get the contract to deploy
   const SolarBear = await ethers.getContractFactory('SolarBear');
   const solarBear = await SolarBear.deploy('https://token-cdn-domain/{id}.json');
 
@@ -22,8 +18,6 @@ async function main() {
   console.log('SolarBear deployed to:', solarBear.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
