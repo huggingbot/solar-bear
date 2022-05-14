@@ -1,7 +1,7 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "prettier:solidity": "prettier --write 'contracts/**/*.sol'",
+    "lint:solidity": "solhint 'contracts/**/*.sol'",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
     "lint:fix": "eslint --fix --ignore-path .gitignore --ext .js,.ts ."
   },
@@ -32,9 +32,7 @@
     "hardhat-gas-reporter": "^1.0.8",
     "husky": "^8.0.1",
     "prettier": "^2.6.2",
-    "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.7",
-    "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.21",
     "ts-node": "^10.7.0",
     "typechain": "^5.2.0",
