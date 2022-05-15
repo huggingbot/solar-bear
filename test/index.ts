@@ -114,5 +114,30 @@ describe('SolarBear contract', function () {
       expect(await sbren.ownerOf(BigNumber.from(9999))).to.not.be.equal(tokenOwner);
       await expect(mint()).to.be.revertedWith('Sender is not a token owner');
     });
+
+    it('should fail if either one of the token ids passed in has been claimed', async () => {
+      const overrideTokenOwner = async (tokenId: number) => {
+        const ownershipStorageSlot = 4;
+        const index = ethers.utils.solidityKeccak256(['uint256', 'uint256'], [tokenId, ownershipStorageSlot]);
+
+        const timestamp = Math.floor(new Date().getTime() / 1000);
+        const packed = utils.solidityPack(['uint64', 'address'], [timestamp, tokenOwner]);
+        const value = utils.hexZeroPad(packed, 32);
+
+        await ethers.provider.send('hardhat_setStorageAt', [sbren.address, index, value]);
+      };
+
+      const mint = async () => {
+        const signer = await ethers.getSigner(tokenOwner);
+        const tx = await solarBear.connect(signer).mint([BigNumber.from(1)]);
+        await tx.wait();
+
+        await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
+      };
+
+      await expect(overrideTokenOwner(1)).to.not.be.reverted;
+      expect(await sbren.ownerOf(BigNumber.from(1))).to.be.equal(tokenOwner);
+      await expect(mint()).to.be.revertedWith('Token has been claimed');
+    });
   });
 });
