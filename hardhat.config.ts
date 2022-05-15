@@ -19,8 +19,11 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
   }
 });
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY ?? '';
+const coinmarketcapApiKey = process.env.COINMARKETCAP_API_KEY ?? '';
+
+const gasReporterGasPriceApiKey = etherscanApiKey ? `&apikey=${etherscanApiKey}` : '';
+const gasReporterCoinmarketcapApiKey = coinmarketcapApiKey ? { coinmarketcap: coinmarketcapApiKey } : {};
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -39,11 +42,14 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
-    currency: 'USD',
+    enabled: process.env.REPORT_GAS === 'true',
+    currency: 'MYR',
+    token: 'ETH',
+    gasPriceApi: `https://api.etherscan.io/api?module=proxy&action=eth_gasPrice${gasReporterGasPriceApiKey}`,
+    ...gasReporterCoinmarketcapApiKey,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: etherscanApiKey,
   },
 };
 
