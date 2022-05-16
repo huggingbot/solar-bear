@@ -12,13 +12,14 @@ describe('SolarBear contract', function () {
   let overrideTokenOwnership: (tokenId: number) => Promise<void>;
   let overrideAddressDataBalance: (balance: number) => Promise<void>;
 
+  const operatorRole = utils.solidityKeccak256(['bytes'], [utils.hexlify(utils.toUtf8Bytes('OPERATOR_ROLE'))]);
   const tokenUri = 'https://token-cdn-domain/{id}.json';
 
   this.beforeAll(async () => {
     sbren = await ethers.getContractAt('SBREN', '0xaCc2Fcc87F57C52F945E3F373B32264E76DcFF84');
 
-    tokenOwner = await sbren.ownerOf(BigNumber.from(0));
-    nonTokenOwner = '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B';
+    tokenOwner = '0xa54d3c09e34ac96807c1cc397404bf2b98dc4efb';
+    nonTokenOwner = '0xab5801a7d398351b8be11c439e05c5b3259aec9b';
     const balanceToSet = utils.hexStripZeros(utils.parseEther('100').toHexString());
 
     await network.provider.request({
@@ -54,6 +55,9 @@ describe('SolarBear contract', function () {
 
       await ethers.provider.send('hardhat_setStorageAt', [sbren.address, index, packedValue]);
     };
+
+    await overrideTokenOwnership(0);
+    await overrideAddressDataBalance(1);
   });
 
   this.beforeEach(async () => {
@@ -69,6 +73,22 @@ describe('SolarBear contract', function () {
 
     it('should have the correct sbren contract address passed in from the constructor', async () => {
       expect(await solarBear.sbrenContract()).to.equal(sbren.address);
+    });
+
+    it('should have the default admin role set to msg.sender', async () => {
+      const [deployer] = await ethers.getSigners();
+
+      expect(await solarBear.hasRole(ethers.constants.HashZero, deployer.address)).to.equal(true);
+    });
+
+    it('should have the operator role set to msg.sender', async () => {
+      const [deployer] = await ethers.getSigners();
+
+      expect(await solarBear.hasRole(operatorRole, deployer.address)).to.equal(true);
+    });
+
+    it('should not be paused initially', async () => {
+      expect(await solarBear.paused()).to.be.equal(false);
     });
   });
 
@@ -147,8 +167,19 @@ describe('SolarBear contract', function () {
       };
 
       await expect(overrideTokenOwnership(1)).to.not.be.reverted;
-      expect(await sbren.ownerOf(BigNumber.from(1))).to.be.equal(tokenOwner);
+      expect((await sbren.ownerOf(BigNumber.from(1))).toLowerCase()).to.be.equal(tokenOwner);
       await expect(mint()).to.be.revertedWith('Token has been claimed');
+    });
+
+    it('should fail running mint method when paused', async () => {
+      const mint = async () => {
+        const signer = await ethers.getSigner(tokenOwner);
+        await solarBear.connect(signer).mint([BigNumber.from(0)]);
+      };
+      const tx = await solarBear.pause();
+      await tx.wait();
+
+      await expect(mint()).to.be.revertedWith('Pausable: paused');
     });
   });
 
@@ -163,7 +194,7 @@ describe('SolarBear contract', function () {
     it('should return token ids owned by an address', async () => {
       await expect(overrideTokenOwnership(1)).to.not.be.reverted;
       await expect(overrideAddressDataBalance(2)).to.not.be.reverted;
-      expect(await sbren.ownerOf(BigNumber.from(1))).to.be.equal(tokenOwner);
+      expect((await sbren.ownerOf(BigNumber.from(1))).toLowerCase()).to.be.equal(tokenOwner);
 
       const signer = await ethers.getSigner(tokenOwner);
       const tokenIds = await solarBear.connect(signer).getTokenIds();
@@ -183,7 +214,7 @@ describe('SolarBear contract', function () {
     beforeEach(async () => {
       await expect(overrideTokenOwnership(1)).to.not.be.reverted;
       await expect(overrideAddressDataBalance(2)).to.not.be.reverted;
-      expect(await sbren.ownerOf(BigNumber.from(1))).to.be.equal(tokenOwner);
+      expect((await sbren.ownerOf(BigNumber.from(1))).toLowerCase()).to.be.equal(tokenOwner);
     });
 
     it('should return non-minted token ids owned by an address', async () => {
@@ -238,6 +269,32 @@ describe('SolarBear contract', function () {
       const tokenIds = await solarBear.connect(signer).getFilteredTokenIds(true);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0), BigNumber.from(1)]);
+    });
+  });
+
+  describe('authorization', () => {
+    it('should allow only operator role to call setURI', async () => {
+      const signer = await ethers.getSigner(tokenOwner);
+
+      await expect(solarBear.connect(signer).setURI('')).to.be.revertedWith(
+        `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
+      );
+    });
+
+    it('should allow only operator role to call pause', async () => {
+      const signer = await ethers.getSigner(tokenOwner);
+
+      await expect(solarBear.connect(signer).pause()).to.be.revertedWith(
+        `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
+      );
+    });
+
+    it('should allow only operator role to call unpause', async () => {
+      const signer = await ethers.getSigner(tokenOwner);
+
+      await expect(solarBear.connect(signer).unpause()).to.be.revertedWith(
+        `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
+      );
     });
   });
 });
