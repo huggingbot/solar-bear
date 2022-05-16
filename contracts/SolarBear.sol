@@ -46,7 +46,7 @@ contract SolarBear is Ownable, ERC1155Pausable {
         uint[] memory tokenIds = getTokenIds();
         uint counter = 0;
         for (uint i = 0; i < tokenIds.length; i++) {
-            if(tokenClaims[tokenIds[i]] == true){                
+            if(tokenClaims[tokenIds[i]] == minted){                
                 counter++;
             }
         }        
