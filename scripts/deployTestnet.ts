@@ -16,9 +16,9 @@ async function main() {
     'SBREN',
     'ipfs://QmNXTanDbZqf1xP5a3RnzcNEeBtSatoCP31Mc8UhRxcbz9/',
     'ipfs://QmNV4rMvay1kjCoiZ8kbbXLwJYANGHfZjMFznwJZ1U3rGa/hidden_metadata.json',
-    '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-    '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
-    '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B'
+    deployer.address,
+    deployer.address,
+    deployer.address
   );
 
   await sbren.deployed();
@@ -29,6 +29,7 @@ async function main() {
 
   await solarBear.deployed();
   console.log('SolarBear deployed to:', solarBear.address);
+  console.log('Account balance:', (await deployer.getBalance()).toString());
 }
 
 main().catch((error) => {
