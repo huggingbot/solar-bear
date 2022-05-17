@@ -297,4 +297,19 @@ describe('SolarBear contract', function () {
       );
     });
   });
+
+  describe('transfer', () => {    
+    it.only('should be able to do transfer when contract is paused', async () => {
+      const signer = await ethers.getSigner(tokenOwner);
+      const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
+      await tx.wait();
+      const tx2 = await solarBear.pause();
+      await tx2.wait();
+      expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
+      expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
+      await solarBear.connect(signer).safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
+      expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
+      expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
+    });
+  });
 });
