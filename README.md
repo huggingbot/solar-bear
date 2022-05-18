@@ -16,6 +16,7 @@ npx hardhat help
 REPORT_GAS=true npx hardhat test
 npx hardhat coverage
 npx hardhat run scripts/deploy.ts
+npx hardhat run scripts/deployTestnet-solarBearOnly.ts --network rinkeby
 TS_NODE_FILES=true npx ts-node scripts/deploy.ts
 npx eslint '**/*.{js,ts}'
 npx eslint '**/*.{js,ts}' --fix
@@ -23,6 +24,7 @@ npx prettier '**/*.{json,sol,md}' --check
 npx prettier '**/*.{json,sol,md}' --write
 npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
+npx hardhat verify 0x002757589C21E5650F834DCFda42AdC213B1E643 'https://token-cdn-domain/{id}.json' 0x5b60c4D406F95bE4DA2d9f6b45e459F9F98d5Db4 --network rinkeby
 ```
 
 # Etherscan verification
