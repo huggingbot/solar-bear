@@ -46,17 +46,17 @@ contract SolarBear is ERC1155, AccessControl, Pausable {
         return super.supportsInterface(interfaceId);
     }
 
-    function getTokenIds() public view returns (uint[] memory){
-        uint256 balance = IERC721Enumerable(sbrenContract).balanceOf(msg.sender);
+    function getTokenIds(address account) public view returns (uint[] memory){
+        uint256 balance = IERC721Enumerable(sbrenContract).balanceOf(account);
         uint[] memory tokenIds = new uint[](balance);
         for (uint i = 0; i < balance; i++) {
-            tokenIds[i] = IERC721Enumerable(sbrenContract).tokenOfOwnerByIndex(msg.sender, i);
+            tokenIds[i] = IERC721Enumerable(sbrenContract).tokenOfOwnerByIndex(account, i);
         }
         return tokenIds;
     }
 
-    function getFilteredTokenIds(bool minted) public view returns (uint[] memory){
-        uint[] memory tokenIds = getTokenIds();
+    function getFilteredTokenIds(bool minted, address account) public view returns (uint[] memory){
+        uint[] memory tokenIds = getTokenIds(account);
         uint counter = 0;
         for (uint i = 0; i < tokenIds.length; i++) {
             if(tokenClaims[tokenIds[i]] == minted){                

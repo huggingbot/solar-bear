@@ -185,8 +185,7 @@ describe('SolarBear contract', function () {
 
   describe('getTokenIds', () => {
     it('should return token id owned by an address', async () => {
-      const signer = await ethers.getSigner(tokenOwner);
-      const tokenIds = await solarBear.connect(signer).getTokenIds();
+      const tokenIds = await solarBear.getTokenIds(tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0)]);
     });
@@ -196,16 +195,13 @@ describe('SolarBear contract', function () {
       await expect(overrideAddressDataBalance(2)).to.not.be.reverted;
       expect((await sbren.ownerOf(BigNumber.from(1))).toLowerCase()).to.be.equal(tokenOwner);
 
-      const signer = await ethers.getSigner(tokenOwner);
-      const tokenIds = await solarBear.connect(signer).getTokenIds();
+      const tokenIds = await solarBear.getTokenIds(tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0), BigNumber.from(1)]);
     });
 
     it('should return empty array if no token id is owned by an address', async () => {
-      const signer = await ethers.getSigner(nonTokenOwner);
-      const tokenIds = await solarBear.connect(signer).getTokenIds();
-
+      const tokenIds = await solarBear.getTokenIds(nonTokenOwner);
       expect(tokenIds).to.have.deep.members([]);
     });
   });
@@ -218,8 +214,7 @@ describe('SolarBear contract', function () {
     });
 
     it('should return non-minted token ids owned by an address', async () => {
-      const signer = await ethers.getSigner(tokenOwner);
-      const tokenIds = await solarBear.connect(signer).getFilteredTokenIds(false);
+      const tokenIds = await solarBear.getFilteredTokenIds(false, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0), BigNumber.from(1)]);
     });
@@ -229,7 +224,7 @@ describe('SolarBear contract', function () {
       const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.connect(signer).getFilteredTokenIds(false);
+      const tokenIds = await solarBear.getFilteredTokenIds(false, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(1)]);
     });
@@ -239,14 +234,14 @@ describe('SolarBear contract', function () {
       const tx = await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.connect(signer).getFilteredTokenIds(false);
+      const tokenIds = await solarBear.getFilteredTokenIds(false, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([]);
     });
 
     it('should return an empty array of minted token id owned by an address', async () => {
       const signer = await ethers.getSigner(tokenOwner);
-      const tokenIds = await solarBear.connect(signer).getFilteredTokenIds(true);
+      const tokenIds = await solarBear.getFilteredTokenIds(true, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([]);
     });
@@ -256,7 +251,7 @@ describe('SolarBear contract', function () {
       const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.connect(signer).getFilteredTokenIds(true);
+      const tokenIds = await solarBear.getFilteredTokenIds(true, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0)]);
     });
@@ -266,7 +261,7 @@ describe('SolarBear contract', function () {
       const tx = await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.connect(signer).getFilteredTokenIds(true);
+      const tokenIds = await solarBear.getFilteredTokenIds(true, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0), BigNumber.from(1)]);
     });
@@ -298,8 +293,8 @@ describe('SolarBear contract', function () {
     });
   });
 
-  describe('transfer', () => {    
-    it.only('should be able to do transfer when contract is paused', async () => {
+  describe('transfer', () => {
+    it('should be able to do transfer when contract is paused', async () => {
       const signer = await ethers.getSigner(tokenOwner);
       const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
