@@ -144,7 +144,7 @@ describe('SolarBear contract', function () {
         await solarBear.connect(signer).mint([BigNumber.from(1000000)]);
       };
 
-      await expect(mint()).to.be.revertedWith('ERC721A: owner query for nonexistent token');
+      await expect(mint()).to.be.revertedWith('panic code 0x32 (Array accessed at an out-of-bounds or negative index)');
     });
 
     it('should fail if sender is not owner for all token ids passed in', async () => {
@@ -206,9 +206,9 @@ describe('SolarBear contract', function () {
     });
 
     it('should return nothing if sent AddressZero as an address', async () => {
-      await expect(solarBear.getTokenIds(ethers.constants.AddressZero))
-        .to.be.revertedWith('balance query for the zero address');
-
+      await expect(solarBear.getTokenIds(ethers.constants.AddressZero)).to.be.revertedWith(
+        'balance query for the zero address'
+      );
     });
   });
 
@@ -246,7 +246,6 @@ describe('SolarBear contract', function () {
     });
 
     it('should return an empty array of minted token id owned by an address', async () => {
-      const signer = await ethers.getSigner(tokenOwner);
       const tokenIds = await solarBear.getFilteredTokenIds(true, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([]);
@@ -308,7 +307,9 @@ describe('SolarBear contract', function () {
       await tx2.wait();
       expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
       expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
-      await solarBear.connect(signer).safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
+      await solarBear
+        .connect(signer)
+        .safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
       expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
       expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
     });
@@ -319,7 +320,9 @@ describe('SolarBear contract', function () {
       await tx.wait();
       expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
       expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
-      await solarBear.connect(signer).safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
+      await solarBear
+        .connect(signer)
+        .safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
       expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
       expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
     });

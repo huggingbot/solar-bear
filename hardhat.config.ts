@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 888,
       },
     },
   },
@@ -59,6 +59,7 @@ const config: HardhatUserConfig = {
     currency: 'MYR',
     token: 'ETH',
     gasPriceApi: `https://api.etherscan.io/api?module=proxy&action=eth_gasPrice${gasReporterGasPriceApiKey}`,
+    gasPrice: 40,
     ...gasReporterCoinmarketcapApiKey,
   },
   etherscan: {

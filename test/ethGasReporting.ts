@@ -23,7 +23,7 @@ xdescribe('eth gas reporting', function () {
     let tokenOwner: string;
 
     this.beforeAll(async () => {
-      tokenOwner = await sbren.ownerOf(BigNumber.from(0));
+      tokenOwner = '0xa54d3c09e34ac96807c1cc397404bf2b98dc4efb';
       const balanceToSet = utils.hexStripZeros(utils.parseEther('100').toHexString());
 
       await network.provider.request({
@@ -34,12 +34,35 @@ xdescribe('eth gas reporting', function () {
     });
 
     it('minting 1 token id', async () => {
-      const mint = async () => {
+      const overrideTokenOwner = async (tokenId: number) => {
+        const ownershipStorageSlot = 4;
+        const index = ethers.utils.solidityKeccak256(['uint256', 'uint256'], [tokenId, ownershipStorageSlot]);
+
+        const timestamp = Math.floor(new Date().getTime() / 1000);
+        const packed = utils.solidityPack(['uint64', 'address'], [timestamp, tokenOwner]);
+        const value = utils.hexZeroPad(packed, 32);
+
+        await ethers.provider.send('hardhat_setStorageAt', [sbren.address, index, value]);
+      };
+      const mint = async (tokenId: number) => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(0)]);
+        await solarBear.connect(signer).mint([BigNumber.from(tokenId)]);
       };
 
-      await expect(mint()).to.not.be.reverted;
+      const loops = 10;
+      let successCount = 0;
+      let tokenId = 0;
+
+      while (successCount < loops) {
+        try {
+          await expect(overrideTokenOwner(tokenId)).to.not.be.reverted;
+          await expect(mint(tokenId)).to.not.be.reverted;
+          successCount++;
+        } catch {
+        } finally {
+          tokenId++;
+        }
+      }
     });
 
     it('minting 2 token ids', async () => {
@@ -54,38 +77,26 @@ xdescribe('eth gas reporting', function () {
         await ethers.provider.send('hardhat_setStorageAt', [sbren.address, index, value]);
       };
 
-      const mint = async () => {
+      const mint = async (tokenId1: number, tokenId2: number) => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
+        await solarBear.connect(signer).mint([BigNumber.from(tokenId1), BigNumber.from(tokenId2)]);
       };
 
-      await expect(overrideTokenOwner(1)).to.not.be.reverted;
-      expect(await sbren.ownerOf(BigNumber.from(1))).to.be.equal(tokenOwner);
-      await expect(mint()).to.not.be.reverted;
-    });
+      const loops = 10;
+      let successCount = 0;
+      let tokenId = 0;
 
-    it('minting 3 token ids', async () => {
-      const overrideTokenOwner = async (tokenId: number) => {
-        const ownershipStorageSlot = 4;
-        const index = ethers.utils.solidityKeccak256(['uint256', 'uint256'], [tokenId, ownershipStorageSlot]);
-
-        const timestamp = Math.floor(new Date().getTime() / 1000);
-        const packed = utils.solidityPack(['uint64', 'address'], [timestamp, tokenOwner]);
-        const value = utils.hexZeroPad(packed, 32);
-
-        await ethers.provider.send('hardhat_setStorageAt', [sbren.address, index, value]);
-      };
-
-      const mint = async () => {
-        const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1), BigNumber.from(2)]);
-      };
-
-      await expect(overrideTokenOwner(1)).to.not.be.reverted;
-      await expect(overrideTokenOwner(2)).to.not.be.reverted;
-      expect(await sbren.ownerOf(BigNumber.from(1))).to.be.equal(tokenOwner);
-      expect(await sbren.ownerOf(BigNumber.from(2))).to.be.equal(tokenOwner);
-      await expect(mint()).to.not.be.reverted;
+      while (successCount < 10) {
+        try {
+          await expect(overrideTokenOwner(tokenId)).to.not.be.reverted;
+          await expect(overrideTokenOwner(tokenId + loops)).to.not.be.reverted;
+          await expect(mint(tokenId, tokenId + loops)).to.not.be.reverted;
+          successCount++;
+        } catch {
+        } finally {
+          tokenId++;
+        }
+      }
     });
   });
 });

@@ -13,7 +13,7 @@ contract SolarBear is ERC1155, AccessControl, Pausable {
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     address public immutable sbrenContract;
-    mapping(uint => bool) public tokenClaims;
+    bool[10000] public tokenClaims;
 
     constructor(string memory _uri, address _sbrenContract) ERC1155(_uri) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -21,7 +21,7 @@ contract SolarBear is ERC1155, AccessControl, Pausable {
         sbrenContract = _sbrenContract;
     }
 
-    function mint(uint[] memory tokenIds) public whenNotPaused {        
+    function mint(uint[] memory tokenIds) public whenNotPaused {
         for (uint i = 0; i < tokenIds.length; i++) {
             require(tokenClaims[tokenIds[i]] == false, "Token has been claimed");
             require(IERC721(sbrenContract).ownerOf(tokenIds[i]) == msg.sender, "Sender is not a token owner");
