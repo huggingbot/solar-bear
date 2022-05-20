@@ -1,7 +1,8 @@
 import { ethers } from 'hardhat';
+import { GAS_PRICE } from '../constants';
+import { deploySolarBear } from '../utils/deployment';
 
-const gasPrice = ethers.utils.parseUnits('40', 'gwei');
-const solarBearTokenUri = 'https://token-cdn-domain/{id}.json';
+const gasPrice = GAS_PRICE;
 
 const sbrenAddress = '0x5b60c4D406F95bE4DA2d9f6b45e459F9F98d5Db4';
 
@@ -12,10 +13,7 @@ async function main() {
 
   console.log('SBREN deployed to:', sbrenAddress);
 
-  const SolarBear = await ethers.getContractFactory('SolarBear');
-  const solarBear = await SolarBear.deploy(solarBearTokenUri, sbrenAddress, { gasPrice });
-
-  await solarBear.deployed();
+  const solarBear = await deploySolarBear(sbrenAddress, { gasPrice });
   console.log('SolarBear deployed to:', solarBear.address);
   console.log('Account balance:', (await deployer.getBalance()).toString());
 }

@@ -2,21 +2,20 @@ import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { ethers, network } from 'hardhat';
 import { SBREN, SolarBear } from '../typechain';
+import { GAS_PRICE } from '../constants';
+import { deploySolarBear } from '../utils/deployment';
 
 xdescribe('eth gas reporting', function () {
   let sbren: SBREN;
   let solarBear: SolarBear;
-
-  const tokenUri = 'https://token-cdn-domain/{id}.json';
 
   this.beforeAll(async () => {
     sbren = await ethers.getContractAt('SBREN', '0xaCc2Fcc87F57C52F945E3F373B32264E76DcFF84');
   });
 
   this.beforeEach(async () => {
-    const SolarBear = await ethers.getContractFactory('SolarBear');
-    solarBear = await SolarBear.deploy(tokenUri, sbren.address);
-    await solarBear.deployed();
+    const gasPrice = GAS_PRICE;
+    solarBear = await deploySolarBear(sbren.address, { gasPrice });
   });
 
   describe('mint method', () => {

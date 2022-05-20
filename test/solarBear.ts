@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { ethers, network } from 'hardhat';
+import { GAS_PRICE, SOLAR_BEAR_TOKEN_URI } from '../constants';
 import { SBREN, SolarBear } from '../typechain';
+import { deploySolarBear, getSbrenContract } from '../utils/deployment';
 
 describe('SolarBear contract', function () {
   let sbren: SBREN;
@@ -13,10 +15,10 @@ describe('SolarBear contract', function () {
   let overrideAddressDataBalance: (balance: number) => Promise<void>;
 
   const operatorRole = utils.solidityKeccak256(['bytes'], [utils.hexlify(utils.toUtf8Bytes('OPERATOR_ROLE'))]);
-  const tokenUri = 'https://token-cdn-domain/{id}.json';
+  const tokenUri = SOLAR_BEAR_TOKEN_URI;
 
   this.beforeAll(async () => {
-    sbren = await ethers.getContractAt('SBREN', '0xaCc2Fcc87F57C52F945E3F373B32264E76DcFF84');
+    sbren = await getSbrenContract();
 
     tokenOwner = '0xa54d3c09e34ac96807c1cc397404bf2b98dc4efb';
     nonTokenOwner = '0xab5801a7d398351b8be11c439e05c5b3259aec9b';
@@ -61,9 +63,8 @@ describe('SolarBear contract', function () {
   });
 
   this.beforeEach(async () => {
-    const SolarBear = await ethers.getContractFactory('SolarBear');
-    solarBear = await SolarBear.deploy(tokenUri, sbren.address);
-    await solarBear.deployed();
+    const gasPrice = GAS_PRICE;
+    solarBear = await deploySolarBear(sbren.address, { gasPrice });
   });
 
   describe('deployment', () => {
