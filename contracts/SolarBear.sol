@@ -14,10 +14,17 @@ contract SolarBear is ERC1155, AccessControl, Pausable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     address public immutable sbrenContract;
     bool[10000] public tokenClaims;
+    // Contract name
+    string public name;
 
-    constructor(string memory _uri, address _sbrenContract) ERC1155(_uri) {
+    constructor(
+        string memory _name,
+        string memory _uri, 
+        address _sbrenContract
+    ) ERC1155(_uri) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, msg.sender);
+        name = _name;
         sbrenContract = _sbrenContract;
     }
 

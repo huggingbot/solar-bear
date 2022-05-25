@@ -8,11 +8,12 @@ export const getSbrenContract = async (): Promise<SBREN> => {
 };
 
 export const deploySolarBear = async (
+  _name: string,
   sbrenAddress: string,
   override?: Overrides & { from?: string | Promise<string> }
 ) => {
   const SolarBear = await ethers.getContractFactory('SolarBear');
-  const solarBear = await SolarBear.deploy(SOLAR_BEAR_TOKEN_URI, sbrenAddress, override);
+  const solarBear = await SolarBear.deploy(_name, SOLAR_BEAR_TOKEN_URI, sbrenAddress, override);
   await solarBear.deployed();
   return solarBear;
 };
