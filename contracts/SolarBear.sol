@@ -9,32 +9,35 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract SolarBear is ERC1155, AccessControl, Pausable {
-    uint public constant SOLAR_BEAR = 0;
+    uint public warPetTokenId;
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
-    address public immutable sbrenContract;
-    bool[10000] public tokenClaims;
+    address public activeContract;
+    // bool[10000] public tokenClaims;
+    mapping(address => bool[10000]) public tokenClaims;
     // Contract name
     string public name;
 
     constructor(
         string memory _name,
         string memory _uri, 
-        address _sbrenContract
+        address _activeContract,
+        uint _warPetTokenId
     ) ERC1155(_uri) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, msg.sender);
         name = _name;
-        sbrenContract = _sbrenContract;
+        activeContract = _activeContract;
+        warPetTokenId = _warPetTokenId;
     }
 
     function mint(uint[] memory tokenIds) public whenNotPaused {
         for (uint i = 0; i < tokenIds.length; i++) {
-            require(tokenClaims[tokenIds[i]] == false, "Token has been claimed");
-            require(IERC721(sbrenContract).ownerOf(tokenIds[i]) == msg.sender, "Sender is not a token owner");
-            tokenClaims[tokenIds[i]] = true;
+            require(tokenClaims[activeContract][tokenIds[i]] == false, "Token has been claimed");
+            require(IERC721(activeContract).ownerOf(tokenIds[i]) == msg.sender, "Sender is not a token owner");
+            tokenClaims[activeContract][tokenIds[i]] = true;
         }
-        _mint(msg.sender, SOLAR_BEAR, tokenIds.length, "");
+        _mint(msg.sender, warPetTokenId, tokenIds.length, "");
     }
 
     function setURI(string memory newuri) public onlyRole(OPERATOR_ROLE) {
@@ -49,15 +52,20 @@ contract SolarBear is ERC1155, AccessControl, Pausable {
         _unpause();
     }
 
+    function switchNation(address _activeContract, uint _warPetTokenId) public onlyRole(OPERATOR_ROLE) {
+        activeContract = _activeContract;
+        warPetTokenId = _warPetTokenId;
+    }
+
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
     function getTokenIds(address account) public view returns (uint[] memory){
-        uint256 balance = IERC721Enumerable(sbrenContract).balanceOf(account);
+        uint256 balance = IERC721Enumerable(activeContract).balanceOf(account);
         uint[] memory tokenIds = new uint[](balance);
         for (uint i = 0; i < balance; i++) {
-            tokenIds[i] = IERC721Enumerable(sbrenContract).tokenOfOwnerByIndex(account, i);
+            tokenIds[i] = IERC721Enumerable(activeContract).tokenOfOwnerByIndex(account, i);
         }
         return tokenIds;
     }
@@ -66,14 +74,14 @@ contract SolarBear is ERC1155, AccessControl, Pausable {
         uint[] memory tokenIds = getTokenIds(account);
         uint counter = 0;
         for (uint i = 0; i < tokenIds.length; i++) {
-            if(tokenClaims[tokenIds[i]] == minted){                
+            if(tokenClaims[activeContract][tokenIds[i]] == minted){                
                 counter++;
             }
         }        
         uint[] memory filteredTokenIds = new uint[](counter);
         counter = 0;
         for (uint i = 0; i < tokenIds.length; i++) {
-            if(tokenClaims[tokenIds[i]] == minted){
+            if(tokenClaims[activeContract][tokenIds[i]] == minted){
                 filteredTokenIds[counter] = tokenIds[i];
                 counter++;
             }

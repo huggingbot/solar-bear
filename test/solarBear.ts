@@ -72,8 +72,8 @@ describe('SolarBear contract', function () {
       expect(await solarBear.uri('0')).to.equal(tokenUri);
     });
 
-    it('should have the correct sbren contract address passed in from the constructor', async () => {
-      expect(await solarBear.sbrenContract()).to.equal(sbren.address);
+    it('should have the correct active contract address passed in from the constructor', async () => {
+      expect(await solarBear.activeContract()).to.equal(sbren.address);
     });
 
     it('should have the default admin role set to msg.sender', async () => {
@@ -99,7 +99,7 @@ describe('SolarBear contract', function () {
         const signer = await ethers.getSigner(tokenOwner);
         await solarBear.connect(signer).mint([BigNumber.from(0)]);
       };
-      const solarBearTokenId = await solarBear.SOLAR_BEAR();
+      const solarBearTokenId = await solarBear.warPetTokenId();
 
       expect(await solarBear.balanceOf(tokenOwner, solarBearTokenId)).to.be.equal(0);
       await expect(mint()).to.not.be.reverted;
@@ -111,7 +111,7 @@ describe('SolarBear contract', function () {
         const signer = await ethers.getSigner(tokenOwner);
         await solarBear.connect(signer).mint([]);
       };
-      const solarBearTokenId = await solarBear.SOLAR_BEAR();
+      const solarBearTokenId = await solarBear.warPetTokenId();
 
       expect(await solarBear.balanceOf(tokenOwner, solarBearTokenId)).to.be.equal(0);
       await expect(mint()).to.not.be.reverted;

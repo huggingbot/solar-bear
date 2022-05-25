@@ -1,4 +1,4 @@
-# Advanced Sample Hardhat Project
+# Soulbond - War Pets
 
 This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
 
@@ -24,7 +24,7 @@ npx prettier '**/*.{json,sol,md}' --check
 npx prettier '**/*.{json,sol,md}' --write
 npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
-npx hardhat verify 0x002757589C21E5650F834DCFda42AdC213B1E643 'https://token-cdn-domain/{id}.json' 0x5b60c4D406F95bE4DA2d9f6b45e459F9F98d5Db4 --network rinkeby
+npx hardhat verify 0x21dC75ad28F7a040E6A08ACbe07375b7196F0110 'Soulbond - War Pets' 'https://token-cdn-domain/{id}.json' 0x5b60c4D406F95bE4DA2d9f6b45e459F9F98d5Db4 --network rinkeby
 ```
 
 # Etherscan verification
