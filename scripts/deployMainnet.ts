@@ -12,7 +12,7 @@ async function main() {
   const sbren = await getSbrenContract();
   console.log('SBREN at:', sbren.address);
 
-  const solarBear = await deploySolarBear(sbren.address, { gasPrice });
+  const solarBear = await deploySolarBear('Soulbond - War Pets', sbren.address, { gasPrice });
   console.log('SolarBear deployed to:', solarBear.address);
   console.log('Account balance:', (await deployer.getBalance()).toString());
 }

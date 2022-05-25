@@ -15,7 +15,7 @@ xdescribe('eth gas reporting', function () {
 
   this.beforeEach(async () => {
     const gasPrice = GAS_PRICE;
-    solarBear = await deploySolarBear(sbren.address, { gasPrice });
+    solarBear = await deploySolarBear('Soulbond - War Pets', sbren.address, { gasPrice });
   });
 
   describe('mint method', () => {
