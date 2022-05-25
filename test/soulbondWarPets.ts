@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { ethers, network } from 'hardhat';
-import { GAS_PRICE, SOLAR_BEAR_TOKEN_URI } from '../constants';
-import { SBREN, SolarBear } from '../typechain';
-import { deploySolarBear, getSbrenContract } from '../utils/deployment';
+import { GAS_PRICE, SOULBOND_WAR_PETS_TOKEN_URI } from '../constants';
+import { SBREN, SoulbondWarPets } from '../typechain';
+import { deploySoulbondWarPets, getSbrenContract } from '../utils/deployment';
 
-describe('SolarBear contract', function () {
+describe('SoulbondWarPets contract', function () {
   let sbren: SBREN;
-  let solarBear: SolarBear;
+  let soulbondWarPets: SoulbondWarPets;
   let tokenOwner: string;
   let nonTokenOwner: string;
 
@@ -15,7 +15,7 @@ describe('SolarBear contract', function () {
   let overrideAddressDataBalance: (balance: number) => Promise<void>;
 
   const operatorRole = utils.solidityKeccak256(['bytes'], [utils.hexlify(utils.toUtf8Bytes('OPERATOR_ROLE'))]);
-  const tokenUri = SOLAR_BEAR_TOKEN_URI;
+  const tokenUri = SOULBOND_WAR_PETS_TOKEN_URI;
 
   this.beforeAll(async () => {
     sbren = await getSbrenContract();
@@ -64,32 +64,32 @@ describe('SolarBear contract', function () {
 
   this.beforeEach(async () => {
     const gasPrice = GAS_PRICE;
-    solarBear = await deploySolarBear('Soulbond - War Pets', sbren.address, { gasPrice });
+    soulbondWarPets = await deploySoulbondWarPets('Soulbond - War Pets', sbren.address, { gasPrice });
   });
 
   describe('deployment', () => {
     it('should have the correct uri passed in from the constructor', async () => {
-      expect(await solarBear.uri('0')).to.equal(tokenUri);
+      expect(await soulbondWarPets.uri('0')).to.equal(tokenUri);
     });
 
     it('should have the correct active contract address passed in from the constructor', async () => {
-      expect(await solarBear.activeContract()).to.equal(sbren.address);
+      expect(await soulbondWarPets.activeContract()).to.equal(sbren.address);
     });
 
     it('should have the default admin role set to msg.sender', async () => {
       const [deployer] = await ethers.getSigners();
 
-      expect(await solarBear.hasRole(ethers.constants.HashZero, deployer.address)).to.equal(true);
+      expect(await soulbondWarPets.hasRole(ethers.constants.HashZero, deployer.address)).to.equal(true);
     });
 
     it('should have the operator role set to msg.sender', async () => {
       const [deployer] = await ethers.getSigners();
 
-      expect(await solarBear.hasRole(operatorRole, deployer.address)).to.equal(true);
+      expect(await soulbondWarPets.hasRole(operatorRole, deployer.address)).to.equal(true);
     });
 
     it('should not be paused initially', async () => {
-      expect(await solarBear.paused()).to.be.equal(false);
+      expect(await soulbondWarPets.paused()).to.be.equal(false);
     });
   });
 
@@ -97,31 +97,31 @@ describe('SolarBear contract', function () {
     it('should mint successfully if sender is owner and token id has not been claimed', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(0)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       };
-      const solarBearTokenId = await solarBear.warPetTokenId();
+      const soulbondWarPetsTokenId = await soulbondWarPets.warPetTokenId();
 
-      expect(await solarBear.balanceOf(tokenOwner, solarBearTokenId)).to.be.equal(0);
+      expect(await soulbondWarPets.balanceOf(tokenOwner, soulbondWarPetsTokenId)).to.be.equal(0);
       await expect(mint()).to.not.be.reverted;
-      expect(await solarBear.balanceOf(tokenOwner, solarBearTokenId)).to.be.equal(1);
+      expect(await soulbondWarPets.balanceOf(tokenOwner, soulbondWarPetsTokenId)).to.be.equal(1);
     });
 
     it('should pass and no transfer made if no token id is given', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([]);
+        await soulbondWarPets.connect(signer).mint([]);
       };
-      const solarBearTokenId = await solarBear.warPetTokenId();
+      const soulbondWarPetsTokenId = await soulbondWarPets.warPetTokenId();
 
-      expect(await solarBear.balanceOf(tokenOwner, solarBearTokenId)).to.be.equal(0);
+      expect(await soulbondWarPets.balanceOf(tokenOwner, soulbondWarPetsTokenId)).to.be.equal(0);
       await expect(mint()).to.not.be.reverted;
-      expect(await solarBear.balanceOf(tokenOwner, solarBearTokenId)).to.be.equal(0);
+      expect(await soulbondWarPets.balanceOf(tokenOwner, soulbondWarPetsTokenId)).to.be.equal(0);
     });
 
     it('should fail if sender is not owner', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(nonTokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(0)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       };
 
       await expect(mint()).to.be.revertedWith('Sender is not a token owner');
@@ -130,10 +130,10 @@ describe('SolarBear contract', function () {
     it('should fail if token id has been claimed', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
-        const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
+        const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
         await tx.wait();
 
-        await solarBear.connect(signer).mint([BigNumber.from(0)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       };
 
       await expect(mint()).to.be.revertedWith('Token has been claimed');
@@ -142,7 +142,7 @@ describe('SolarBear contract', function () {
     it('should fail if token id given is out of scope', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(1000000)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(1000000)]);
       };
 
       await expect(mint()).to.be.revertedWith('panic code 0x32 (Array accessed at an out-of-bounds or negative index)');
@@ -151,7 +151,7 @@ describe('SolarBear contract', function () {
     it('should fail if sender is not owner for all token ids passed in', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(9999)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(0), BigNumber.from(9999)]);
       };
 
       expect(await sbren.ownerOf(BigNumber.from(9999))).to.not.be.equal(tokenOwner);
@@ -161,10 +161,10 @@ describe('SolarBear contract', function () {
     it('should fail if either one of the token ids passed in has been claimed', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
-        const tx = await solarBear.connect(signer).mint([BigNumber.from(1)]);
+        const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(1)]);
         await tx.wait();
 
-        await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
       };
 
       await expect(overrideTokenOwnership(1)).to.not.be.reverted;
@@ -175,9 +175,9 @@ describe('SolarBear contract', function () {
     it('should fail running mint method when paused', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(0)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       };
-      const tx = await solarBear.pause();
+      const tx = await soulbondWarPets.pause();
       await tx.wait();
 
       await expect(mint()).to.be.revertedWith('Pausable: paused');
@@ -186,7 +186,7 @@ describe('SolarBear contract', function () {
 
   describe('getTokenIds', () => {
     it('should return token id owned by an address', async () => {
-      const tokenIds = await solarBear.getTokenIds(tokenOwner);
+      const tokenIds = await soulbondWarPets.getTokenIds(tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0)]);
     });
@@ -196,18 +196,18 @@ describe('SolarBear contract', function () {
       await expect(overrideAddressDataBalance(2)).to.not.be.reverted;
       expect((await sbren.ownerOf(BigNumber.from(1))).toLowerCase()).to.be.equal(tokenOwner);
 
-      const tokenIds = await solarBear.getTokenIds(tokenOwner);
+      const tokenIds = await soulbondWarPets.getTokenIds(tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0), BigNumber.from(1)]);
     });
 
     it('should return empty array if no token id is owned by an address', async () => {
-      const tokenIds = await solarBear.getTokenIds(nonTokenOwner);
+      const tokenIds = await soulbondWarPets.getTokenIds(nonTokenOwner);
       expect(tokenIds).to.have.deep.members([]);
     });
 
     it('should return nothing if sent AddressZero as an address', async () => {
-      await expect(solarBear.getTokenIds(ethers.constants.AddressZero)).to.be.revertedWith(
+      await expect(soulbondWarPets.getTokenIds(ethers.constants.AddressZero)).to.be.revertedWith(
         'balance query for the zero address'
       );
     });
@@ -221,53 +221,53 @@ describe('SolarBear contract', function () {
     });
 
     it('should return non-minted token ids owned by an address', async () => {
-      const tokenIds = await solarBear.getFilteredTokenIds(false, tokenOwner);
+      const tokenIds = await soulbondWarPets.getFilteredTokenIds(false, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0), BigNumber.from(1)]);
     });
 
     it('should return non-minted token id owned by an address', async () => {
       const signer = await ethers.getSigner(tokenOwner);
-      const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
+      const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.getFilteredTokenIds(false, tokenOwner);
+      const tokenIds = await soulbondWarPets.getFilteredTokenIds(false, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(1)]);
     });
 
     it('should return an empty array of non-minted token id owned by an address', async () => {
       const signer = await ethers.getSigner(tokenOwner);
-      const tx = await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
+      const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.getFilteredTokenIds(false, tokenOwner);
+      const tokenIds = await soulbondWarPets.getFilteredTokenIds(false, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([]);
     });
 
     it('should return an empty array of minted token id owned by an address', async () => {
-      const tokenIds = await solarBear.getFilteredTokenIds(true, tokenOwner);
+      const tokenIds = await soulbondWarPets.getFilteredTokenIds(true, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([]);
     });
 
     it('should return minted token id owned by an address', async () => {
       const signer = await ethers.getSigner(tokenOwner);
-      const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
+      const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.getFilteredTokenIds(true, tokenOwner);
+      const tokenIds = await soulbondWarPets.getFilteredTokenIds(true, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0)]);
     });
 
     it('should return minted token ids owned by an address', async () => {
       const signer = await ethers.getSigner(tokenOwner);
-      const tx = await solarBear.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
+      const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0), BigNumber.from(1)]);
       await tx.wait();
 
-      const tokenIds = await solarBear.getFilteredTokenIds(true, tokenOwner);
+      const tokenIds = await soulbondWarPets.getFilteredTokenIds(true, tokenOwner);
 
       expect(tokenIds).to.have.deep.members([BigNumber.from(0), BigNumber.from(1)]);
     });
@@ -277,7 +277,7 @@ describe('SolarBear contract', function () {
     it('should allow only operator role to call setURI', async () => {
       const signer = await ethers.getSigner(tokenOwner);
 
-      await expect(solarBear.connect(signer).setURI('')).to.be.revertedWith(
+      await expect(soulbondWarPets.connect(signer).setURI('')).to.be.revertedWith(
         `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
       );
     });
@@ -285,7 +285,7 @@ describe('SolarBear contract', function () {
     it('should allow only operator role to call pause', async () => {
       const signer = await ethers.getSigner(tokenOwner);
 
-      await expect(solarBear.connect(signer).pause()).to.be.revertedWith(
+      await expect(soulbondWarPets.connect(signer).pause()).to.be.revertedWith(
         `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
       );
     });
@@ -293,7 +293,7 @@ describe('SolarBear contract', function () {
     it('should allow only operator role to call unpause', async () => {
       const signer = await ethers.getSigner(tokenOwner);
 
-      await expect(solarBear.connect(signer).unpause()).to.be.revertedWith(
+      await expect(soulbondWarPets.connect(signer).unpause()).to.be.revertedWith(
         `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
       );
     });
@@ -302,30 +302,30 @@ describe('SolarBear contract', function () {
   describe('transfer', () => {
     it('should be able to do transfer when contract is paused', async () => {
       const signer = await ethers.getSigner(tokenOwner);
-      const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
+      const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
-      const tx2 = await solarBear.pause();
+      const tx2 = await soulbondWarPets.pause();
       await tx2.wait();
-      expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
-      expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
-      await solarBear
+      expect(await soulbondWarPets.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
+      expect(await soulbondWarPets.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
+      await soulbondWarPets
         .connect(signer)
         .safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
-      expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
-      expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
+      expect(await soulbondWarPets.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
+      expect(await soulbondWarPets.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
     });
 
     it('should be able to do transfer when contract is not paused', async () => {
       const signer = await ethers.getSigner(tokenOwner);
-      const tx = await solarBear.connect(signer).mint([BigNumber.from(0)]);
+      const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
-      expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
-      expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
-      await solarBear
+      expect(await soulbondWarPets.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
+      expect(await soulbondWarPets.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
+      await soulbondWarPets
         .connect(signer)
         .safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
-      expect(await solarBear.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
-      expect(await solarBear.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
+      expect(await soulbondWarPets.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
+      expect(await soulbondWarPets.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
     });
   });
 });

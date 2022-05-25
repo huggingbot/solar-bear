@@ -8,15 +8,13 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-contract SolarBear is ERC1155, AccessControl, Pausable {
-    uint public warPetTokenId;
-
+contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
-    address public activeContract;
-    // bool[10000] public tokenClaims;
-    mapping(address => bool[10000]) public tokenClaims;
-    // Contract name
+    
     string public name;
+    address public activeContract;
+    uint public warPetTokenId;
+    mapping(address => bool[10000]) public tokenClaims;
 
     constructor(
         string memory _name,

@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { ethers, network } from 'hardhat';
-import { SBREN, SolarBear } from '../typechain';
+import { SBREN, SoulbondWarPets } from '../typechain';
 import { GAS_PRICE } from '../constants';
-import { deploySolarBear } from '../utils/deployment';
+import { deploySoulbondWarPets } from '../utils/deployment';
 
 xdescribe('eth gas reporting', function () {
   let sbren: SBREN;
-  let solarBear: SolarBear;
+  let soulbondWarPets: SoulbondWarPets;
 
   this.beforeAll(async () => {
     sbren = await ethers.getContractAt('SBREN', '0xaCc2Fcc87F57C52F945E3F373B32264E76DcFF84');
@@ -15,7 +15,7 @@ xdescribe('eth gas reporting', function () {
 
   this.beforeEach(async () => {
     const gasPrice = GAS_PRICE;
-    solarBear = await deploySolarBear('Soulbond - War Pets', sbren.address, { gasPrice });
+    soulbondWarPets = await deploySoulbondWarPets('Soulbond - War Pets', sbren.address, { gasPrice });
   });
 
   describe('mint method', () => {
@@ -45,7 +45,7 @@ xdescribe('eth gas reporting', function () {
       };
       const mint = async (tokenId: number) => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(tokenId)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(tokenId)]);
       };
 
       const loops = 10;
@@ -78,7 +78,7 @@ xdescribe('eth gas reporting', function () {
 
       const mint = async (tokenId1: number, tokenId2: number) => {
         const signer = await ethers.getSigner(tokenOwner);
-        await solarBear.connect(signer).mint([BigNumber.from(tokenId1), BigNumber.from(tokenId2)]);
+        await soulbondWarPets.connect(signer).mint([BigNumber.from(tokenId1), BigNumber.from(tokenId2)]);
       };
 
       const loops = 10;
