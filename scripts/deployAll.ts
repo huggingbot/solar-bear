@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat';
-import { GAS_PRICE } from '../constants';
-import { deploySoulbondWarPets } from '../utils/deployment';
+import { GAS_PRICE, SOULBOND_WAR_PETS_NAME } from '../constants';
+import { deploySbren, deploySoulbondWarPets } from '../utils/deployment';
 
 const gasPrice = GAS_PRICE;
 
@@ -9,22 +9,10 @@ async function main() {
   console.log('Deploying contracts with the account:', deployer.address);
   console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  const SBREN = await ethers.getContractFactory('SBREN');
-  const sbren = await SBREN.deploy(
-    'Soulbond - Ren Empire',
-    'SBREN',
-    'ipfs://QmNXTanDbZqf1xP5a3RnzcNEeBtSatoCP31Mc8UhRxcbz9/',
-    'ipfs://QmNV4rMvay1kjCoiZ8kbbXLwJYANGHfZjMFznwJZ1U3rGa/hidden_metadata.json',
-    deployer.address,
-    deployer.address,
-    deployer.address,
-    { gasPrice }
-  );
-
-  await sbren.deployed();
+  const sbren = await deploySbren(deployer.address, { gasPrice });
   console.log('SBREN deployed to:', sbren.address);
 
-  const soulbondWarPets = await deploySoulbondWarPets('Soulbond - War Pets', sbren.address, { gasPrice });
+  const soulbondWarPets = await deploySoulbondWarPets(SOULBOND_WAR_PETS_NAME, sbren.address, { gasPrice });
   console.log('SoulbondWarPets deployed to:', soulbondWarPets.address);
   console.log('Account balance:', (await deployer.getBalance()).toString());
 }

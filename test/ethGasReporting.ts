@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { ethers, network } from 'hardhat';
 import { SBREN, SoulbondWarPets } from '../typechain';
-import { GAS_PRICE } from '../constants';
+import { GAS_PRICE, SOULBOND_WAR_PETS_NAME } from '../constants';
 import { deploySoulbondWarPets } from '../utils/deployment';
 
 xdescribe('eth gas reporting', function () {
@@ -15,7 +15,7 @@ xdescribe('eth gas reporting', function () {
 
   this.beforeEach(async () => {
     const gasPrice = GAS_PRICE;
-    soulbondWarPets = await deploySoulbondWarPets('Soulbond - War Pets', sbren.address, { gasPrice });
+    soulbondWarPets = await deploySoulbondWarPets(SOULBOND_WAR_PETS_NAME, sbren.address, { gasPrice });
   });
 
   describe('mint method', () => {

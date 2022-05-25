@@ -13,20 +13,20 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
     
     string public name;
     address public activeContract;
-    uint public warPetTokenId;
+    uint public warPetId;
     mapping(address => bool[10000]) public tokenClaims;
 
     constructor(
         string memory _name,
         string memory _uri, 
         address _activeContract,
-        uint _warPetTokenId
+        uint _warPetId
     ) ERC1155(_uri) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, msg.sender);
         name = _name;
         activeContract = _activeContract;
-        warPetTokenId = _warPetTokenId;
+        warPetId = _warPetId;
     }
 
     function mint(uint[] memory tokenIds) public whenNotPaused {
@@ -35,7 +35,7 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
             require(IERC721(activeContract).ownerOf(tokenIds[i]) == msg.sender, "Sender is not a token owner");
             tokenClaims[activeContract][tokenIds[i]] = true;
         }
-        _mint(msg.sender, warPetTokenId, tokenIds.length, "");
+        _mint(msg.sender, warPetId, tokenIds.length, "");
     }
 
     function setURI(string memory newuri) public onlyRole(OPERATOR_ROLE) {
@@ -50,9 +50,9 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
         _unpause();
     }
 
-    function switchNation(address _activeContract, uint _warPetTokenId) public onlyRole(OPERATOR_ROLE) {
+    function switchNation(address _activeContract, uint _warPetId) public onlyRole(OPERATOR_ROLE) {
         activeContract = _activeContract;
-        warPetTokenId = _warPetTokenId;
+        warPetId = _warPetId;
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
