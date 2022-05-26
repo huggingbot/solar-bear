@@ -12,28 +12,27 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     
     string public name;
-    // address public activeContract;
     uint public warPetId;
-    mapping(uint => address) public warPetToNation;
+    mapping(uint => address) public warPetNation;
     mapping(uint => bool[10000]) public tokenClaims;
 
     constructor(
         string memory _name,
         string memory _uri, 
-        address _activeContract,
+        address _nationContract,
         uint _warPetId
     ) ERC1155(_uri) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, msg.sender);
         name = _name;
         warPetId = _warPetId;
-        warPetToNation[_warPetId] = _activeContract;
+        warPetNation[_warPetId] = _nationContract;
     }
 
     function mint(uint[] memory tokenIds) public whenNotPaused {
         for (uint i = 0; i < tokenIds.length; i++) {
             require(tokenClaims[warPetId][tokenIds[i]] == false, "Token has been claimed");
-            require(IERC721(warPetToNation[warPetId]).ownerOf(tokenIds[i]) == msg.sender, "Sender is not a token owner");
+            require(IERC721(warPetNation[warPetId]).ownerOf(tokenIds[i]) == msg.sender, "Sender is not a token owner");
             tokenClaims[warPetId][tokenIds[i]] = true;
         }
         _mint(msg.sender, warPetId, tokenIds.length, "");
@@ -51,10 +50,10 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
         _unpause();
     }
 
-    function switchNation(address _activeContract, uint _warPetId) public onlyRole(OPERATOR_ROLE) {
-        require(warPetToNation[_warPetId] == address(0), "This war pet belongs to other nation");
+    function switchNation(address _nationContract, uint _warPetId) public onlyRole(OPERATOR_ROLE) {
+        require(warPetNation[_warPetId] == address(0), "War pet already has a nation");
         warPetId = _warPetId;
-        warPetToNation[_warPetId] = _activeContract;
+        warPetNation[_warPetId] = _nationContract;
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
@@ -62,10 +61,10 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
     }
 
     function getTokenIds(address account) public view returns (uint[] memory){
-        uint256 balance = IERC721Enumerable(warPetToNation[warPetId]).balanceOf(account);
+        uint256 balance = IERC721Enumerable(warPetNation[warPetId]).balanceOf(account);
         uint[] memory tokenIds = new uint[](balance);
         for (uint i = 0; i < balance; i++) {
-            tokenIds[i] = IERC721Enumerable(warPetToNation[warPetId]).tokenOfOwnerByIndex(account, i);
+            tokenIds[i] = IERC721Enumerable(warPetNation[warPetId]).tokenOfOwnerByIndex(account, i);
         }
         return tokenIds;
     }
