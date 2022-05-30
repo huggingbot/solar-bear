@@ -16,6 +16,7 @@ describe('SoulbondWarPets contract', function () {
 
   const operatorRole = utils.solidityKeccak256(['bytes'], [utils.hexlify(utils.toUtf8Bytes('OPERATOR_ROLE'))]);
   const tokenUri = SOULBOND_WAR_PETS_TOKEN_URI;
+  const randomAddress = '0x5b60c4D406F95bE4DA2d9f6b45e459F9F98d5Db4';
 
   this.beforeAll(async () => {
     sbren = await getSbrenContract();
@@ -98,6 +99,16 @@ describe('SoulbondWarPets contract', function () {
 
     it('should not be paused initially', async () => {
       expect(await soulbondWarPets.paused()).to.be.equal(false);
+    });
+
+    it('should have the owner set to msg.sender', async () => {
+      const [deployer] = await ethers.getSigners();
+
+      expect(await soulbondWarPets.owner()).to.equal(deployer.address);
+    });
+
+    it('should have the token uri set', async () => {
+      expect(await soulbondWarPets.tokenURIs(WAR_PET_ID)).to.equal(SOULBOND_WAR_PETS_TOKEN_URI);
     });
   });
 
@@ -224,14 +235,13 @@ describe('SoulbondWarPets contract', function () {
 
   describe('switchNation', () => {
     it('should be able to switch with a different war pet nation and a different war pet id', async () => {
-      const randomAddress = '0x5b60c4D406F95bE4DA2d9f6b45e459F9F98d5Db4';
       const newWarPetId = 1;
 
       expect(await soulbondWarPets.warPetNation(WAR_PET_ID)).to.be.equal(sbren.address);
       expect(await soulbondWarPets.warPetNation(newWarPetId)).to.be.equal(ethers.constants.AddressZero);
       expect(await soulbondWarPets.warPetId()).to.be.equal(WAR_PET_ID);
 
-      await soulbondWarPets.switchNation(randomAddress, newWarPetId);
+      await expect(soulbondWarPets.switchNation(randomAddress, newWarPetId)).to.not.be.reverted;
 
       expect(await soulbondWarPets.warPetNation(WAR_PET_ID)).to.be.equal(sbren.address);
       expect(await soulbondWarPets.warPetNation(newWarPetId)).to.be.equal(randomAddress);
@@ -245,7 +255,7 @@ describe('SoulbondWarPets contract', function () {
       expect(await soulbondWarPets.warPetNation(newWarPetId)).to.be.equal(ethers.constants.AddressZero);
       expect(await soulbondWarPets.warPetId()).to.be.equal(WAR_PET_ID);
 
-      await soulbondWarPets.switchNation(sbren.address, newWarPetId);
+      await expect(soulbondWarPets.switchNation(sbren.address, newWarPetId)).to.not.be.reverted;
 
       expect(await soulbondWarPets.warPetNation(WAR_PET_ID)).to.be.equal(sbren.address);
       expect(await soulbondWarPets.warPetNation(newWarPetId)).to.be.equal(sbren.address);
@@ -364,36 +374,52 @@ describe('SoulbondWarPets contract', function () {
   });
 
   describe('authorization', () => {
-    it('should allow only operator role to call setURI', async () => {
+    it('should allow only operator role to call setTokenURI', async () => {
+      const newWarPetId = 1;
+
+      const [deployer] = await ethers.getSigners();
       const signer = await ethers.getSigner(tokenOwner);
 
-      // await expect(soulbondWarPets.connect(signer).setURI('')).to.be.revertedWith(
-      //   `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
-      // );
+      await expect(soulbondWarPets.switchNation(randomAddress, newWarPetId)).to.not.be.reverted;
+
+      await expect(soulbondWarPets.connect(signer).setTokenURI(newWarPetId, 'myuri')).to.be.revertedWith(
+        `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
+      );
+      await expect(soulbondWarPets.connect(deployer).setTokenURI(newWarPetId, 'myuri')).to.not.be.reverted;
     });
 
     it('should allow only operator role to call pause', async () => {
+      const [deployer] = await ethers.getSigners();
       const signer = await ethers.getSigner(tokenOwner);
 
       await expect(soulbondWarPets.connect(signer).pause()).to.be.revertedWith(
         `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
       );
+      await expect(soulbondWarPets.connect(deployer).pause()).to.not.be.reverted;
     });
 
     it('should allow only operator role to call unpause', async () => {
+      const [deployer] = await ethers.getSigners();
       const signer = await ethers.getSigner(tokenOwner);
+
+      await expect(soulbondWarPets.connect(deployer).pause()).to.not.be.reverted;
 
       await expect(soulbondWarPets.connect(signer).unpause()).to.be.revertedWith(
         `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
       );
+      await expect(soulbondWarPets.connect(deployer).unpause()).to.not.be.reverted;
     });
 
     it('should allow only operator role to call switchNation', async () => {
+      const newWarPetId = 1;
+
+      const [deployer] = await ethers.getSigners();
       const signer = await ethers.getSigner(tokenOwner);
 
-      await expect(soulbondWarPets.connect(signer).switchNation(sbren.address, WAR_PET_ID)).to.be.revertedWith(
+      await expect(soulbondWarPets.connect(signer).switchNation(randomAddress, newWarPetId)).to.be.revertedWith(
         `AccessControl: account ${signer.address.toLowerCase()} is missing role ${operatorRole}`
       );
+      await expect(soulbondWarPets.connect(deployer).switchNation(randomAddress, newWarPetId)).to.not.be.reverted;
     });
   });
 
@@ -424,6 +450,41 @@ describe('SoulbondWarPets contract', function () {
         .safeTransferFrom(tokenOwner, nonTokenOwner, BigNumber.from(0), BigNumber.from(1), []);
       expect(await soulbondWarPets.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(0);
       expect(await soulbondWarPets.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(1);
+    });
+  });
+
+  describe('setTokenURI', () => {
+    it('should not revert if war pet nation is set', async () => {
+      const newWarPetId = 1;
+      await expect(soulbondWarPets.switchNation(randomAddress, newWarPetId)).to.not.be.reverted;
+
+      await expect(soulbondWarPets.setTokenURI(newWarPetId, 'myuri')).to.not.be.reverted;
+      expect(await soulbondWarPets.tokenURIs(newWarPetId)).to.be.equal('myuri');
+    });
+
+    it('should revert if war pet nation is not set', async () => {
+      const newWarPetId = 1;
+      await expect(soulbondWarPets.setTokenURI(newWarPetId, 'myuri')).to.be.revertedWith(
+        'setTokenURI: Token should exist'
+      );
+    });
+
+    it('should be able to change existing war pet token uri', async () => {
+      expect(await soulbondWarPets.tokenURIs(WAR_PET_ID)).to.be.equal(SOULBOND_WAR_PETS_TOKEN_URI);
+
+      await expect(soulbondWarPets.setTokenURI(WAR_PET_ID, 'myuri')).to.not.be.reverted;
+
+      expect(await soulbondWarPets.tokenURIs(WAR_PET_ID)).to.be.equal('myuri');
+    });
+  });
+
+  describe('uri', () => {
+    it('should return the uri for a specific war pet id', async () => {
+      expect(await soulbondWarPets.uri(WAR_PET_ID)).to.be.equal(SOULBOND_WAR_PETS_TOKEN_URI);
+    });
+
+    it('should return an empty string if war pet id does not exist', async () => {
+      expect(await soulbondWarPets.uri(1)).to.be.equal('');
     });
   });
 });

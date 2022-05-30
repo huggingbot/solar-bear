@@ -18,7 +18,7 @@ contract SoulbondWarPets is ERC1155, AccessControl, Ownable, Pausable {
     mapping(uint => bool[10000]) public tokenClaims;
 
     // Optional mapping for token URIs
-    mapping(uint256 => string) private _tokenURIs;
+    mapping(uint256 => string) public tokenURIs;
 
     constructor(
         string memory _name,
@@ -31,7 +31,7 @@ contract SoulbondWarPets is ERC1155, AccessControl, Ownable, Pausable {
         name = _name;
         warPetId = _warPetId;
         warPetNation[_warPetId] = _nationContract;
-        _setTokenURI(_warPetId, _uri);
+        setTokenURI(_warPetId, _uri);
     }
 
     function mint(uint[] memory tokenIds) public whenNotPaused {
@@ -90,11 +90,11 @@ contract SoulbondWarPets is ERC1155, AccessControl, Ownable, Pausable {
     }
 
     function uri(uint256 _warPetId) public view virtual override returns (string memory) {
-        return _tokenURIs[_warPetId];
+        return tokenURIs[_warPetId];
     }
 
-    function _setTokenURI(uint256 _warPetId, string memory _uri) public onlyRole(OPERATOR_ROLE) {
-        require(warPetNation[_warPetId] != address(0x0), "_setTokenURI: Token should exist");
-        _tokenURIs[_warPetId] = _uri;
+    function setTokenURI(uint256 _warPetId, string memory _uri) public onlyRole(OPERATOR_ROLE) {
+        require(warPetNation[_warPetId] != address(0x0), "setTokenURI: Token should exist");
+        tokenURIs[_warPetId] = _uri;
     }
 }
