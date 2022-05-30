@@ -25,7 +25,7 @@ npx prettier '**/*.{json,sol,md}' --check
 npx prettier '**/*.{json,sol,md}' --write
 npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
-npx hardhat verify 0x826dAd83B52e9bC14829b1B7dDDD6BB24949170c 'Soulbond - War Pets' 'https://token-cdn-domain/{id}.json' 0x4391eF31013eE89449727df99285c60141d3ba89 0 --network rinkeby
+npx hardhat verify 0x0573f332b72fbB3AF3ABe02fc7B2854D933b54bF 'Soulbond - War Pets' 'ipfs://QmNsoNr6rBXQMvqR28A8RCbgH6qysVK9W1DoUyixzE9HTw' 0x77de29A4f31a11D948f12760327174DF4D6FF22F 0 --network rinkeby
 npx hardhat verify 0x4391eF31013eE89449727df99285c60141d3ba89 'Soulbond - Ren Empire' 'SBREN' 'ipfs://QmNXTanDbZqf1xP5a3RnzcNEeBtSatoCP31Mc8UhRxcbz9/' 'ipfs://QmNV4rMvay1kjCoiZ8kbbXLwJYANGHfZjMFznwJZ1U3rGa/hidden_metadata.json' 0x670740464d5abfEDd3ec78463d3C1BF81F1dbdaa 0x670740464d5abfEDd3ec78463d3C1BF81F1dbdaa 0x670740464d5abfEDd3ec78463d3C1BF81F1dbdaa --network rinkeby
 ```
 

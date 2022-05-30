@@ -4,17 +4,21 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
+contract SoulbondWarPets is ERC1155, AccessControl, Ownable, Pausable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     
     string public name;
     uint public warPetId;
     mapping(uint => address) public warPetNation;
     mapping(uint => bool[10000]) public tokenClaims;
+
+    // Optional mapping for token URIs
+    mapping(uint256 => string) private _tokenURIs;
 
     constructor(
         string memory _name,
@@ -27,6 +31,7 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
         name = _name;
         warPetId = _warPetId;
         warPetNation[_warPetId] = _nationContract;
+        _setTokenURI(_warPetId, _uri);
     }
 
     function mint(uint[] memory tokenIds) public whenNotPaused {
@@ -36,10 +41,6 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
             tokenClaims[warPetId][tokenIds[i]] = true;
         }
         _mint(msg.sender, warPetId, tokenIds.length, "");
-    }
-
-    function setURI(string memory newuri) public onlyRole(OPERATOR_ROLE) {
-        _setURI(newuri);
     }
 
     function pause() public onlyRole(OPERATOR_ROLE) {
@@ -86,5 +87,14 @@ contract SoulbondWarPets is ERC1155, AccessControl, Pausable {
             }
         }     
         return filteredTokenIds;
+    }
+
+    function uri(uint256 _warPetId) public view virtual override returns (string memory) {
+        return _tokenURIs[_warPetId];
+    }
+
+    function _setTokenURI(uint256 _warPetId, string memory _uri) public onlyRole(OPERATOR_ROLE) {
+        require(warPetNation[_warPetId] != address(0x0), "_setTokenURI: Token should exist");
+        _tokenURIs[_warPetId] = _uri;
     }
 }

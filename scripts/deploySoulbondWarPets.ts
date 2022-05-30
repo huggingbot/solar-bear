@@ -2,8 +2,8 @@ import { ethers } from 'hardhat';
 import { GAS_PRICE, SOULBOND_WAR_PETS_NAME } from '../constants';
 import { deploySoulbondWarPets, getSbrenContract } from '../utils/deployment';
 
-// const sbrenAddress = '0x5b60c4D406F95bE4DA2d9f6b45e459F9F98d5Db4';
-const sbrenAddress = undefined;
+const sbrenAddress = '0x77de29A4f31a11D948f12760327174DF4D6FF22F';
+// const sbrenAddress = undefined;
 const gasPrice = GAS_PRICE;
 
 async function main() {
