@@ -97,8 +97,8 @@ describe('SoulbondWarPets contract', function () {
       expect(await soulbondWarPets.hasRole(operatorRole, deployer.address)).to.equal(true);
     });
 
-    it('should not be paused initially', async () => {
-      expect(await soulbondWarPets.paused()).to.be.equal(false);
+    it('should be paused initially', async () => {
+      expect(await soulbondWarPets.paused()).to.be.equal(true);
     });
 
     it('should have the owner set to msg.sender', async () => {
@@ -113,6 +113,11 @@ describe('SoulbondWarPets contract', function () {
   });
 
   describe('mint method', () => {
+    beforeEach(async () => {
+      const tx = await soulbondWarPets.unpause();
+      await tx.wait();
+    });
+
     it('should mint successfully if sender is owner and token id has not been claimed', async () => {
       const mint = async () => {
         const signer = await ethers.getSigner(tokenOwner);
@@ -315,6 +320,9 @@ describe('SoulbondWarPets contract', function () {
 
   describe('getFilteredTokenIds', () => {
     beforeEach(async () => {
+      const tx = await soulbondWarPets.unpause();
+      await tx.wait();
+
       await expect(overrideTokenOwnership(1)).to.not.be.reverted;
       await expect(overrideAddressDataBalance(2)).to.not.be.reverted;
       expect((await sbren.ownerOf(BigNumber.from(1))).toLowerCase()).to.be.equal(tokenOwner);
@@ -374,6 +382,11 @@ describe('SoulbondWarPets contract', function () {
   });
 
   describe('authorization', () => {
+    beforeEach(async () => {
+      const tx = await soulbondWarPets.unpause();
+      await tx.wait();
+    });
+
     it('should allow only operator role to call setTokenURI', async () => {
       const newWarPetId = 1;
 
@@ -424,12 +437,19 @@ describe('SoulbondWarPets contract', function () {
   });
 
   describe('transfer', () => {
+    beforeEach(async () => {
+      const tx = await soulbondWarPets.unpause();
+      await tx.wait();
+    });
+
     it('should be able to do transfer when contract is paused', async () => {
       const signer = await ethers.getSigner(tokenOwner);
       const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
+
       const tx2 = await soulbondWarPets.pause();
       await tx2.wait();
+
       expect(await soulbondWarPets.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
       expect(await soulbondWarPets.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
       await soulbondWarPets
@@ -443,6 +463,7 @@ describe('SoulbondWarPets contract', function () {
       const signer = await ethers.getSigner(tokenOwner);
       const tx = await soulbondWarPets.connect(signer).mint([BigNumber.from(0)]);
       await tx.wait();
+
       expect(await soulbondWarPets.balanceOf(tokenOwner, BigNumber.from(0))).to.be.equal(1);
       expect(await soulbondWarPets.balanceOf(nonTokenOwner, BigNumber.from(0))).to.be.equal(0);
       await soulbondWarPets

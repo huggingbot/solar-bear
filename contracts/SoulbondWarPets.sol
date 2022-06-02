@@ -32,6 +32,7 @@ contract SoulbondWarPets is ERC1155, AccessControl, Ownable, Pausable {
         warPetId = _warPetId;
         warPetNation[_warPetId] = _nationContract;
         setTokenURI(_warPetId, _uri);
+        _pause();
     }
 
     function mint(uint[] memory tokenIds) public whenNotPaused {
