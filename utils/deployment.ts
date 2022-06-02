@@ -1,6 +1,6 @@
 import { Overrides } from 'ethers';
 import { ethers } from 'hardhat';
-import { WAR_PET_ID, SBREN_CONTRACT_ADDRESS, SOULBOND_WAR_PETS_TOKEN_URI } from '../constants';
+import { SBREN_CONTRACT_ADDRESS, SOULBOND_WAR_PETS_NAME, SOULBOND_WAR_PETS_TOKEN_URI, WAR_PET_ID } from '../constants';
 import { SBREN, SoulbondWarPets } from '../typechain';
 
 export const getSbrenContract = async (address = SBREN_CONTRACT_ADDRESS): Promise<SBREN> => {
@@ -26,14 +26,16 @@ export const deploySbren = async (
   return sbren;
 };
 
-export const deploySoulbondWarPets = async (
-  _name: string,
-  sbrenAddress: string,
-  override: Overrides & { from?: string | Promise<string> } = {}
-): Promise<SoulbondWarPets> => {
+export const deploySoulbondWarPets = async ({
+  sbrenAddress = SBREN_CONTRACT_ADDRESS,
+  override = {},
+}: {
+  sbrenAddress?: string;
+  override?: Overrides & { from?: string | Promise<string> };
+}): Promise<SoulbondWarPets> => {
   const SoulbondWarPets = await ethers.getContractFactory('SoulbondWarPets');
   const soulbondWarPets = await SoulbondWarPets.deploy(
-    _name,
+    SOULBOND_WAR_PETS_NAME,
     SOULBOND_WAR_PETS_TOKEN_URI,
     sbrenAddress,
     WAR_PET_ID,

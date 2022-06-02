@@ -1,21 +1,17 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { ethers, network } from 'hardhat';
+import { GAS_PRICE } from '../constants';
 import { SBREN, SoulbondWarPets } from '../typechain';
-import { GAS_PRICE, SOULBOND_WAR_PETS_NAME } from '../constants';
 import { deploySoulbondWarPets } from '../utils/deployment';
 
 xdescribe('eth gas reporting', function () {
   let sbren: SBREN;
   let soulbondWarPets: SoulbondWarPets;
 
-  this.beforeAll(async () => {
-    sbren = await ethers.getContractAt('SBREN', '0xaCc2Fcc87F57C52F945E3F373B32264E76DcFF84');
-  });
-
   this.beforeEach(async () => {
     const gasPrice = GAS_PRICE;
-    soulbondWarPets = await deploySoulbondWarPets(SOULBOND_WAR_PETS_NAME, sbren.address, { gasPrice });
+    soulbondWarPets = await deploySoulbondWarPets({ override: { gasPrice } });
 
     const tx = await soulbondWarPets.unpause();
     await tx.wait();

@@ -65,7 +65,7 @@ describe('SoulbondWarPets contract', function () {
 
   this.beforeEach(async () => {
     const gasPrice = GAS_PRICE;
-    soulbondWarPets = await deploySoulbondWarPets(SOULBOND_WAR_PETS_NAME, sbren.address, { gasPrice });
+    soulbondWarPets = await deploySoulbondWarPets({ sbrenAddress: sbren.address, override: { gasPrice } });
   });
 
   describe('deployment', () => {

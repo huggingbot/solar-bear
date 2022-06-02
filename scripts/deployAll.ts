@@ -1,5 +1,5 @@
 import { ethers } from 'hardhat';
-import { GAS_PRICE, SOULBOND_WAR_PETS_NAME } from '../constants';
+import { GAS_PRICE } from '../constants';
 import { deploySbren, deploySoulbondWarPets } from '../utils/deployment';
 
 const gasPrice = GAS_PRICE;
@@ -12,7 +12,7 @@ async function main() {
   const sbren = await deploySbren(deployer.address, { gasPrice });
   console.log('SBREN deployed to:', sbren.address);
 
-  const soulbondWarPets = await deploySoulbondWarPets(SOULBOND_WAR_PETS_NAME, sbren.address, { gasPrice });
+  const soulbondWarPets = await deploySoulbondWarPets({ sbrenAddress: sbren.address, override: { gasPrice } });
   console.log('SoulbondWarPets deployed to:', soulbondWarPets.address);
   console.log('Account balance:', (await deployer.getBalance()).toString());
 }
